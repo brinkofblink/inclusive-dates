@@ -35,6 +35,7 @@ export interface InclusiveDatesLabels {
   maxDateError?: string;
   minDateError?: string;
   rangeOutOfBoundsError?: string;
+  disabledDateError?: string;
   to?: string;
   startDate?: string;
 }
@@ -47,6 +48,7 @@ const defaultLabels: InclusiveDatesLabels = {
   minDateError: `Please fill in a date after `,
   maxDateError: `Please fill in a date before `,
   rangeOutOfBoundsError: `Please enter a valid range of dates`,
+  disabledDateError: `Please choose an available date`,
   to: "to",
   startDate: "Start date"
 };
@@ -112,7 +114,8 @@ export class InclusiveDates {
   // Show or hide the keyboard hints
   @Prop() showKeyboardHint?: boolean = true;
   // Function to disable individual dates
-  @Prop() disableDate?: HTMLInclusiveDatesCalendarElement["disableDate"];
+  @Prop() disableDate?: HTMLInclusiveDatesCalendarElement["disableDate"] = () =>
+    false;
   // Component name used to generate CSS classes
   @Prop() elementClassName?: string = "inclusive-dates";
   // Which day that should start the week (0 is sunday, 1 is monday)
@@ -298,8 +301,13 @@ export class InclusiveDates {
         referenceDate: removeTimezoneOffset(new Date(this.referenceDate))
       });
       if (parsedDate && parsedDate.value instanceof Date) {
-        this.updateValue(parsedDate.value);
-        this.formatInput(true, false);
+        if (this.disableDate(parsedDate.value)) {
+          this.errorState = true;
+          this.errorMessage = this.inclusiveDatesLabels.disabledDateError;
+        } else {
+          this.updateValue(parsedDate.value);
+          this.formatInput(true, false);
+        }
       } else if (parsedDate) {
         this.errorState = true;
         this.internalValue = null;
@@ -553,6 +561,7 @@ export class InclusiveDates {
             showYearStepper={this.showYearStepper}
             showClearButton={this.showClearButton}
             showKeyboardHint={this.showKeyboardHint}
+            disableDate={this.disableDate}
             minDate={this.minDate}
             maxDate={this.maxDate}
           />
