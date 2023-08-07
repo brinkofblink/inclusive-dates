@@ -92,6 +92,9 @@ export class InclusiveDates {
 
   @Prop() inclusiveDatesCalendarLabels?: InclusiveDatesCalendarLabels;
 
+  // Prevent hiding the calendar
+  @Prop() inline?: boolean = false;
+
   // Current error state of the input field
   @Prop({ mutable: true }) hasError?: boolean = false;
   // Text label for next month button
@@ -510,15 +513,17 @@ export class InclusiveDates {
             aria-describedby={this.errorState ? `${this.id}-error` : undefined}
             aria-invalid={this.errorState}
           />
-          <button
-            type="button"
-            ref={(r) => (this.calendarButtonRef = r)}
-            onClick={this.handleCalendarButtonClick}
-            class={this.getClassName("calendar-button")}
-            disabled={this.disabledState}
-          >
-            {this.inclusiveDatesLabels.openCalendar}
-          </button>
+          {!this.inline && (
+            <button
+              type="button"
+              ref={(r) => (this.calendarButtonRef = r)}
+              onClick={this.handleCalendarButtonClick}
+              class={this.getClassName("calendar-button")}
+              disabled={this.disabledState}
+            >
+              {this.inclusiveDatesLabels.openCalendar}
+            </button>
+          )}
         </div>
         <inclusive-dates-modal
           label={this.inclusiveDatesLabels.calendar}
@@ -529,6 +534,7 @@ export class InclusiveDates {
           onClosed={() => {
             this.pickerRef.modalIsOpen = false;
           }}
+          inline={this.inline}
         >
           <inclusive-dates-calendar
             range={this.range}
